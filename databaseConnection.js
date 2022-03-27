@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-const URL = 'mongodb+srv://kalaindia:kalaindia1234@kala.7ibng.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+    const URL = 'mongodb+srv://kalaindia:kalaindia1234@kala.7ibng.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
 
 const databaseConnection = async () => {
     try{
-        await mongoose.connect(URL, {
+        mongoose.connect(URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         })

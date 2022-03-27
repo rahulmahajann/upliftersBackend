@@ -16,7 +16,30 @@ const addVideo = async(req,res) => {
         likes
     });
 
-    newVideo.save().then(res.json({success:true})).catch((err)=> res.json(err));
+    newVideo.save().then(res.json({success:true})).catch((err)=> res.json({success:false,message:err}));
 }
 
-module.exports = {addVideo};
+const likeVideo = async(req,res) => {
+    
+    const {token} = req.headers;
+
+    const {_id} = req.body;
+
+
+    Video.findByIdAndUpdate(_id,{$push:{likes:user._id}}).then(res.json({success:true}))
+    .catch(err => res.json({success:false, message:err}));
+}
+
+const unlikeVideo = async(res,res) => {
+
+    const {token} = req.headers;
+
+    const {_id} = req.body;
+
+
+    Video.findByIdAndUpdate(_id,{$pull:{likes:user._id}}).then(res.json({success:true}))
+    .catch(err => res.json({success:false, message:err}));
+
+}
+
+module.exports = {addVideo, likeVideo, unlikeVideo};

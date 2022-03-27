@@ -8,6 +8,7 @@ const videoSchema = mongoose.Schema({
 
         videoTags:{
             type:Array,
+            required:true,
         },
 
         videoURL:{
@@ -19,10 +20,11 @@ const videoSchema = mongoose.Schema({
             type:String,
         },
 
-        likes:{
+        likes:[{
             type:mongoose.Schema.Types.ObjectId,
             ref:'User',
-        }
+        }]
+        
     },
 
     {
