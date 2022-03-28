@@ -1,6 +1,7 @@
 const { blankFieldErrorMessage } = require('../constants/strings');
 const USER = require('../models/userModels');
 const jwt = require('jsonwebtoken');
+const fast2sms = require('fast-two-sms');
 require('dotenv').config();
 
 const signUp = async (req, res) => {
@@ -63,10 +64,27 @@ const signIn = async (req, res) => {
             OTP += digits[Math.floor(Math.random() * 10)]
         }
 
+        console.log(process.env.Fast_2_SMS_Key);
+
         try{
+            const params = {
+                authorization: process.env.Fast_2_SMS_Key,
+                message: `Hey ${isUser.userName}, Your OTP for login is ${OTP} - from team Kala India.`,
+                numbers: [`${userPhone}`]
+            }
+
+            fast2sms.sendMessage(params)
+                .then((res) => {
+                    console.log(res);
+                }).catch((err) => {
+                    console.log(err);
+                })
+
             await USER.findByIdAndUpdate(isUser, {
                 userOtp: OTP
             })
+
+
             return res.json({
                 success: true,
                 message: 'OTP sent successfully'

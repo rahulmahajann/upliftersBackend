@@ -50,8 +50,6 @@ const likeVideo = async(req,res) => {
 
     const likesArr = videoInfo.likes;
 
-    // console.log(likesArr);
-
     if(likesArr.includes(userInfo._id)){
         try{
             await Video.findByIdAndUpdate({_id : videoId}, {
