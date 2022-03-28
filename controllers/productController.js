@@ -1,3 +1,4 @@
+const { getRelatedProductsForPid, getSearchedProducts } = require("../constants/recommendationModel");
 const { blankFieldErrorMessage } = require("../constants/strings");
 const Product = require('../models/productModel');
 
@@ -37,7 +38,7 @@ const addProduct = async(req, res) => {
 const getProductDescription = async (req, res) => {
     const {productId} = req.body;
 
-    if(!producId){
+    if(!productId){
         return res.json({
             success: false,
             message: blankFieldErrorMessage
@@ -45,6 +46,20 @@ const getProductDescription = async (req, res) => {
     }
 
     const productFound = await Product.findOne({_id:productId});
+    
+    // arrays of ID dega reolated items ka!
+    const relatedProducts = await getRelatedProductsForPid(productId);
+
+    const relatedProductData = [];
+    for(var i = 0; i < relatedProducts.length; i++){
+        const productInfo = await Product.findOne({
+            _id: relatedProducts[i]._id
+        })
+
+        relatedProductData.push(productInfo);
+    }
+
+    productFound.relatedProducts = relatedProductData;
 
     if(!productFound){
         return res.json({
@@ -71,19 +86,14 @@ const getProductListing = async (req, res) => {
         })
     }
 
-    // function(searchParameter){
-        // return arrOfObjects -> id's
-    // }
-
-    productData = [];
-
-    for(var i = 0; i < arrObj.length; i++){
+    const similarProducts = await getSearchedProducts(searchParameter);
+    const productData = [];
+    for(var i = 0; i < similarProducts.length; i++){
         const productInfo = await Product.findOne({
-            _id: arrObj[i]._id
+            _id: similarProducts[i]._id
         })
 
         productData.push(productInfo);
-
     }
 
     return res.json({

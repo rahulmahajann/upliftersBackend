@@ -5,17 +5,14 @@ const videoSchema = mongoose.Schema({
             type:String,
             required:true,
         },
-
         videoTags:{
             type:Array,
             required:true,
         },
-
         videoURL:{
             type:String,
             required:true,
         }, 
-
         likes:[{
             type:mongoose.Schema.Types.ObjectId,
             ref:'User',
@@ -24,7 +21,6 @@ const videoSchema = mongoose.Schema({
             type:mongoose.Schema.Types.ObjectId,
             ref:'Product',
         }
-        
     },
 
     {

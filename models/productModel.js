@@ -24,7 +24,7 @@ const productSchema = mongoose.Schema({
 
         productStory : {
             type:String,
-        }
+        },
     },
     {
         timestamps:true,

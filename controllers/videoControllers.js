@@ -1,6 +1,7 @@
 const { blankFieldErrorMessage } = require('../constants/strings');
 const Video = require('../models/videoModels');
 const Product = require('../models/productModel');
+const { recommendItems } = require('../constants/recommendationModel');
 
 const addVideo = async(req,res) => {
 
@@ -84,4 +85,21 @@ const likeVideo = async(req,res) => {
 
 }
 
-module.exports = {addVideo, likeVideo};
+const getVideo = async (req, res) => {
+
+    const userInfo = req.user;
+
+    const ri = await recommendItems(0, 2);
+
+    const rId = await Promise.all(ri.map(async (id) => {
+        const videoInfo = await Video.findOne({
+            _id: id
+        });
+        return videoInfo;
+    })
+    )
+
+    return rId;
+}
+
+module.exports = {addVideo, likeVideo, getVideo};
