@@ -77,7 +77,10 @@ const signIn = async (req, res) => {
                 .then((res) => {
                     console.log(res);
                 }).catch((err) => {
-                    console.log(err);
+                    return res.json({
+                        success: false,
+                        message: err
+                    })
                 })
 
             await USER.findByIdAndUpdate(isUser, {
