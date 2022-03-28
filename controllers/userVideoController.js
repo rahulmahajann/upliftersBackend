@@ -5,12 +5,12 @@ const Video = require('../models/videoModels');
 const setWatchTime = async (req, res) => {
     const userInfo = req.user;
 
-    const {videoId, watchTime} = req.body;
+    const {videoId, watchTime, duration} = req.body;
 
-    if(!videoId || !watchTime){
+    if(!videoId || !watchTime || !duration){
         return res.json({
             success: false,
-            message: blankFieldErrorMessage
+            message: blankFieldErrorMessage 
         })
     }
 
@@ -39,7 +39,8 @@ const setWatchTime = async (req, res) => {
             userId: userInfo._id,
             videoId,
             watchTime,
-            liked
+            liked,
+            duration
         })
         
         newUserVideo.save()
@@ -55,20 +56,24 @@ const setWatchTime = async (req, res) => {
                 })
             })
     }else{
-        const maxWatchTime = Math.max(watchTime, isUserVideo.watchTime);
+
         const videoInfo = await Video.findOne({
             _id: videoId
         });
 
+
         const likeArr = videoInfo.likes;
-        var liked = false
+        var like = false
         if(likeArr.includes(userInfo._id)){
-            liked = true
+            console.log(likeArr.includes(userInfo._id), 'yha se?');
+            like = true
         }else{
-            liked = false
+            console.log(likeArr.includes(userInfo._id), 'nhi yha se!');
+            like = false
         }
-        isUserVideo.watchTime = maxWatchTime;
-        isUserVideo.liked = liked;
+        isUserVideo.watchTime = Number(isUserVideo.watchTime) + Number(watchTime);
+        isUserVideo.duration = Number(isUserVideo.duration) + Number(duration);
+        isUserVideo.liked = like;
         isUserVideo.save()
             .then(() => {
                 return res.json({
@@ -78,7 +83,7 @@ const setWatchTime = async (req, res) => {
             }).catch((err) => {
                 return res.json({
                     success: false,
-                    message: error
+                    message: err
                 })
             })
 

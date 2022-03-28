@@ -14,16 +14,16 @@ const videoSchema = mongoose.Schema({
         videoURL:{
             type:String,
             required:true,
-        },
-
-        linkToProduct:{
-            type:String,
-        },
+        }, 
 
         likes:[{
             type:mongoose.Schema.Types.ObjectId,
             ref:'User',
-        }]
+        }],
+        relatedProduct:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'Product',
+        }
         
     },
 

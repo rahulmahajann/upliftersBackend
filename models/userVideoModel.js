@@ -16,6 +16,10 @@ const userVideoSchema = mongoose.Schema(
         },
         liked: {
             type: Boolean
+        },
+        duration:{
+            type: Number,
+            default:0
         }
     },
     {
