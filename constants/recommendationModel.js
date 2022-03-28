@@ -1,12 +1,62 @@
 const ContentBasedRecommender = require("content-based-recommender");
 const TfIdf = require('tf-idf-search');
+const UserProduct = require("../models/userProductModel");
+const UserVideo = require("../models/userVideoModel");
 const { getVideoDataSet, getProductDataSet } = require("./functions");
 const tf_idf = new TfIdf();
 
 let videos, products;
 
+async function getUIV(userId){
+    const userVideoInfo = await UserVideo.find({
+        userId
+    });
+
+    const UIV = userVideoInfo.map(({videoId, UIV, liked, watchTime, duration}) => {
+        
+        let score = UIV;
+        if(liked){
+            score += 150;
+        }
+
+        score += (watchTime/duration) * 100;
+
+        return {
+            id: videoId,
+            score
+        }
+    })
+
+    return UIV;
+}
+
+async function getUIP(userId){
+    const userVideoInfo = await UserProduct.find({
+        userId
+    });
+
+    const UIP = userVideoInfo.map(({productId, UIP, addedToCart, productClicked}) => {
+        
+        let score = UIP;
+        if(addedToCart){
+            score += 100;
+        }
+
+        score += (productClicked) * 10;
+
+        return {
+            id: productId,
+            score
+        }
+    })
+
+    return UIP;
+}
+
+
+
 // key -> 0 -> video, 1->product
-async function recommendItems(key, noOfItems) {
+async function recommendItems(key, noOfItems, userId) {
   const probabilityOfChoosingShop = Math.floor(Math.random() * 100) + 1;
   const recommender = new ContentBasedRecommender();
   if (probabilityOfChoosingShop <= 50) {
@@ -23,7 +73,8 @@ async function recommendItems(key, noOfItems) {
     }
     // access video interaction from db
     // User Interaction on Videos from DB
-    const UIV = [{id:"1000001",score:12},{id:"1000009",score:34},{id:"1000002",score:45},{id:"1000007",score:23}];
+    const UIV = await getUIV(userId);
+
     UIV.sort((a,b)=>{return b.score-a.score})
     console.log(UIV);
     const UIV_len = UIV.length;
@@ -59,7 +110,7 @@ async function recommendItems(key, noOfItems) {
     }
     // access Product interaction from db
     // User Interaction on Products from DB
-    const UIP = [{id:"6",score:82},{id:"2",score:34},{id:"4",score:45}];
+    const UIP = await getUIP(userId);
     UIP.sort((a,b)=>{return b.score-a.score});
     console.log(UIP);
     const UIP_len = UIP.length;
@@ -131,8 +182,8 @@ async function getRelatedProductsForPid(id){
     return res;
 }
 
-async function getRelatedToProduct(noOfItems){
-    const UIP = [{id:"6",score:82},{id:"2",score:34},{id:"4",score:45}];
+async function getRelatedToProduct(noOfItems, userId){
+    const UIP = await getUIP(userId);
     UIP.sort((a,b)=>{return b.score-a.score});
     const RUIP = UIP.slice(0,noOfItems);
     
@@ -143,26 +194,54 @@ async function getRelatedToProduct(noOfItems){
     return res;
 }
 
-async function getSearchedProducts(query){
+async function getSearchedProducts(query, userId){
     products = await getProductDataSet();
   const productsDocs = products.map(({id,content})=>content);
   const searchedProducts = await getRelatedProductsFromQuery(query, productsDocs);
   // console.log(searchedProducts);
   let res = [];
-  searchedProducts.forEach(({index,similarityIndex})=>{
-    if(similarityIndex>0)res.push(products[index].id);
+  searchedProducts.forEach(async ({index,similarityIndex})=>{
+    if(similarityIndex>0){
+        res.push(products[index].id);
+        const userProduct = await UserProduct.findOne({
+            userId,
+            productId: products[index].id
+        })
+        userProduct.UIP += (similarityIndex * 10);
+
+        try{
+            await userProduct.save();
+        }catch(err){
+            console.log(err);
+        }
+
+    }
   });
+  getSearchedvideos(query, userId);
   return res;
 }
 
-async function getSearchedvideos(query){
+async function getSearchedvideos(query, userId){
     videos = await getVideoDataSet();
     const videosDocs = videos.map(({id,content})=>content);
     const searchedvideos = await getRelatedvideosFromQuery(query, videosDocs);
     // console.log(searchedvideos);
     let res = [];
-    searchedvideos.forEach(({index,similarityIndex})=>{
-    if(similarityIndex>0)res.push(videos[index].id);
+    searchedvideos.forEach(async ({index,similarityIndex})=>{
+    if(similarityIndex>0){
+        res.push(videos[index].id);
+        const userVideo = await UserVideo.findOne({
+            userId,
+            videoId: videos[index].id
+        })
+        userVideo.UIV += (similarityIndex * 10);
+
+        try{
+            await userVideo.save();
+        }catch(err){
+            console.log(err);
+        }
+    }
   });
   return res;
 }
@@ -182,14 +261,14 @@ async function getRelatedvideosFromQuery(query,videos){
 }
 
 
-async function getRecommendedItems(){
-  // const res =await  recommendItems(1,8);
-  // const res =await getSearchedProducts("");
-  // const res = await getRelatedProductsForPid("1000006");
-  const res = await getRelatedToProduct(5);
-  console.log(res);
-}
-getRecommendedItems();
+// async function getRecommendedItems(){
+//   // const res =await  recommendItems(1,8);
+//   // const res =await getSearchedProducts("");
+//   // const res = await getRelatedProductsForPid("1000006");
+//   const res = await getRelatedToProduct(5);
+//   console.log(res);
+// }
+// getRecommendedItems();
 
 // videos -> content = title + tags + productsTags
 // products -> content = title + desc + tags

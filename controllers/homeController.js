@@ -5,7 +5,7 @@ const getHomePageData = async (req, res) => {
     
     const userInfo = req.user;
 
-    const ri = await recommendItems(1, 6);
+    const ri = await recommendItems(1, 6, userInfo._id);
     const rtp = await getRelatedToProduct(2);
 
 

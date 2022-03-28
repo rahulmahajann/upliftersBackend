@@ -66,10 +66,10 @@ const setWatchTime = async (req, res) => {
         var like = false
         if(likeArr.includes(userInfo._id)){
             console.log(likeArr.includes(userInfo._id), 'yha se?');
-            like = true
+            like = false
         }else{
             console.log(likeArr.includes(userInfo._id), 'nhi yha se!');
-            like = false
+            like = true
         }
         isUserVideo.watchTime = Number(isUserVideo.watchTime) + Number(watchTime);
         isUserVideo.duration = Number(isUserVideo.duration) + Number(duration);

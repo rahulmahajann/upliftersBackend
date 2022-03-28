@@ -89,7 +89,7 @@ const getVideo = async (req, res) => {
 
     const userInfo = req.user;
 
-    const ri = await recommendItems(0, 2);
+    const ri = await recommendItems(0, 2, userInfo._id);
 
     const rId = await Promise.all(ri.map(async (id) => {
         const videoInfo = await Video.findOne({

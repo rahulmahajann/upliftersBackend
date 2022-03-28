@@ -77,6 +77,7 @@ const getProductDescription = async (req, res) => {
 };
 
 const getProductListing = async (req, res) => {
+    const userInfo = req.user;
     const {searchParameter} = req.body;
 
     if(!searchParameter){
@@ -86,7 +87,7 @@ const getProductListing = async (req, res) => {
         })
     }
 
-    const similarProducts = await getSearchedProducts(searchParameter);
+    const similarProducts = await getSearchedProducts(searchParameter, userInfo._id);
     const productData = [];
     for(var i = 0; i < similarProducts.length; i++){
         const productInfo = await Product.findOne({
