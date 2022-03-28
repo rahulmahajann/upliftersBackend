@@ -84,25 +84,4 @@ const likeVideo = async(req,res) => {
 
 }
 
-const unlikeVideo = async(req,res) => {
-    
-    const userInfo = req.user;
-    const {videoId} = req.body;
-
-
-    Video.findByIdAndUpdate({_id:videoId},
-        {
-            $pull: {likes:userInfo._id}}
-    )
-        .then(() => {
-            res.json({
-                success:true,
-                message: 'video unliked successfully'
-            })
-        })
-        .catch((err) => {
-            res.json({success:false, message:err})
-        });
-}
-
-module.exports = {addVideo, likeVideo, unlikeVideo};
+module.exports = {addVideo, likeVideo};

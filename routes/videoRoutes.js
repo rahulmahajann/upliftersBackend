@@ -1,5 +1,5 @@
 const express = require('express');
-const { addVideo, likeVideo, unlikeVideo } = require('../controllers/videoControllers');
+const { addVideo, likeVideo } = require('../controllers/videoControllers');
 const validToken = require('../middleware/authorization');
 const router = express.Router();
 
@@ -8,6 +8,5 @@ router.get('/healthy', (req, res) => {
 });
 router.post('/addVideo', validToken, addVideo);
 router.put('/likeVideo', validToken, likeVideo);
-router.put('/unlikeVideo', validToken, unlikeVideo);
 
 module.exports = router;

@@ -4,7 +4,7 @@ const validToken = require('../middleware/authorization');
 const router = express.Router();
 
 router.get('/healthy', (req, res) => {
-    res.send('user route is working!');
+    res.send('product route is working!');
 });
 router.post('/addProduct', validToken, addProduct);
 

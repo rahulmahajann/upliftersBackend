@@ -20,7 +20,7 @@ const setWatchTime = async (req, res) => {
     });
 
     if(!isUserVideo){
-
+        
         const videoInfo = await Video.findOne({
             _id: videoId
         });

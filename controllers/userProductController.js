@@ -2,7 +2,7 @@ const { blankFieldErrorMessage } = require("../constants/strings");
 const UserProduct = require("../models/userProductModel");
 
 const addUserProduct = async(req, res) => {
-    const userInfo = req.headers;
+    const userInfo = req.user;
     const {productId, clicked} = req.body;
     if(!productId){
         return res.json({
@@ -10,8 +10,6 @@ const addUserProduct = async(req, res) => {
             message: blankFieldErrorMessage
         })
     }
-
-    console.log(typeof clicked);
 
     const isUserProduct = await UserProduct.findOne({
         userId: userInfo._id,

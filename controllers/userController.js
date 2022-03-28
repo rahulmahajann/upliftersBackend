@@ -64,7 +64,6 @@ const signIn = async (req, res) => {
             OTP += digits[Math.floor(Math.random() * 10)]
         }
 
-        console.log(process.env.Fast_2_SMS_Key);
 
         try{
             const params = {
