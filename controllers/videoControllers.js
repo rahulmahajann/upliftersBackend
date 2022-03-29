@@ -99,7 +99,10 @@ const getVideo = async (req, res) => {
     })
     )
 
-    return rId;
+    return res.json({
+        success: true,
+        message: rId
+    });
 }
 
 module.exports = {addVideo, likeVideo, getVideo};

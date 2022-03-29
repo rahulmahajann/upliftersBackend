@@ -16,6 +16,7 @@ const getProductDataSet = async () => {
 
 const getVideoDataSet = async () => {
     const videoData = await Video.find();
+    console.log(videoData[0]._id);
     const vi = await Promise.all(videoData.map(async ({_id, videoTitle, videoTags, relatedProduct}) => {
         let content = videoTitle + videoTags.join(' ');
         if(relatedProduct){

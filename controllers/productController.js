@@ -1,12 +1,13 @@
 const { getRelatedProductsForPid, getSearchedProducts } = require("../constants/recommendationModel");
 const { blankFieldErrorMessage } = require("../constants/strings");
 const Product = require('../models/productModel');
+const UserProduct = require("../models/userProductModel");
 
 const addProduct = async(req, res) => {
 
-    const {productImage, productTitle, productTags, productDescription, productStory} = req.body;
+    const {productImage, productCost, productTitle, productTags, productDescription, productStory} = req.body;
 
-    if(!productTitle || !productImage || !productTags || !productDescription){
+    if(!productTitle || !productCost || !productImage || !productTags || !productDescription){
         return res.json({
             success: false,
             message: blankFieldErrorMessage
@@ -18,7 +19,8 @@ const addProduct = async(req, res) => {
         productStory,
         productDescription,
         productTags,
-        productTitle
+        productTitle,
+        productCost
     });
     
     newProduct.save()
@@ -59,7 +61,10 @@ const getProductDescription = async (req, res) => {
         relatedProductData.push(productInfo);
     }
 
-    productFound.relatedProducts = relatedProductData;
+    const newProductInfo = {
+        ...productFound._doc,
+        relatedProducts: relatedProductData
+    }
 
     if(!productFound){
         return res.json({
@@ -70,7 +75,7 @@ const getProductDescription = async (req, res) => {
     else{
         return res.json({
             success:true,
-            message:productFound
+            message: newProductInfo
         })
     }
     
@@ -79,6 +84,7 @@ const getProductDescription = async (req, res) => {
 const getProductListing = async (req, res) => {
     const userInfo = req.user;
     const {searchParameter} = req.body;
+    console.log(searchParameter);
 
     if(!searchParameter){
         return res.json({
@@ -103,4 +109,28 @@ const getProductListing = async (req, res) => {
     
 }
 
-module.exports = {addProduct, getProductDescription, getProductListing};
+const getCartProduct = async(req, res) => {
+    const userInfo = req.user;
+
+    const getProductId = await UserProduct.find({
+        userId: userInfo._id,
+        addedToCart: true
+    })
+
+    const cartProducts = [];
+
+    for(var i = 0; i < getProductId.length; i++){
+        const productInfo = await Product.findOne({
+            _id: getProductId[i].productId
+        });
+
+        cartProducts.push(productInfo);
+    }
+
+    return res.json({
+        success: true,
+        message: cartProducts
+    })
+}
+
+module.exports = {addProduct, getCartProduct, getProductDescription, getProductListing};

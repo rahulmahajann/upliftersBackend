@@ -14,9 +14,6 @@ const userVideoSchema = mongoose.Schema(
         watchTime: {
             type: Number
         },
-        liked: {
-            type: Boolean
-        },
         duration:{
             type: Number,
             default:0

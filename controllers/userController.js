@@ -2,6 +2,10 @@ const { blankFieldErrorMessage } = require('../constants/strings');
 const USER = require('../models/userModels');
 const jwt = require('jsonwebtoken');
 const fast2sms = require('fast-two-sms');
+const Product = require('../models/productModel');
+const Video = require('../models/videoModels');
+const UserProduct = require('../models/userProductModel');
+const UserVideo = require('../models/userVideoModel');
 require('dotenv').config();
 
 const signUp = async (req, res) => {
@@ -117,6 +121,27 @@ const validateOtp = async (req, res) => {
 
         const token = jwt.sign({_id: isUser._id}, process.env.JWT_SECRET_KEY);
         console.log(token);
+
+        const product = await Product.find();
+        const video = await Video.find();
+
+        for(var i = 0; i < product.length; i++){
+            const newUserProduct = new UserProduct({
+                userId: isUser._id,
+                productId: product[i]._id,
+                UIP: 0
+            })
+            await newUserProduct.save()
+        }
+
+        for(var i = 0; i < video.length; i++){
+            const newUserVideo = new UserVideo({
+                userId: isUser._id,
+                videoId: video[i]._id,
+                UIV: 0
+            })
+            await newUserVideo.save();
+        }
         
         return res.json({
             success: true,

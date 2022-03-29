@@ -6,8 +6,10 @@ const getHomePageData = async (req, res) => {
     const userInfo = req.user;
 
     const ri = await recommendItems(1, 6, userInfo._id);
-    const rtp = await getRelatedToProduct(2);
+    const rtp = await getRelatedToProduct(2, userInfo._id);
 
+    console.log('lala');
+    console.log(rtp);
 
     const rId = await Promise.all(ri.map(async (id) => {
         const productInfo = await Product.findOne({
@@ -25,6 +27,7 @@ const getHomePageData = async (req, res) => {
             const productInfo = await Product.findOne({
                 _id: id
             });
+            // console.log(productInfo);
             return productInfo;
         })
         )
@@ -36,10 +39,10 @@ const getHomePageData = async (req, res) => {
     })
     )
 
-    return {
+    return res.json({
             relatedToProducts: rTpd,
             recommendedProducts: rId
-        }
+        })
 
 }
 

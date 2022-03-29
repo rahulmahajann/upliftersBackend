@@ -2,6 +2,7 @@ const ContentBasedRecommender = require("content-based-recommender");
 const TfIdf = require('tf-idf-search');
 const UserProduct = require("../models/userProductModel");
 const UserVideo = require("../models/userVideoModel");
+const Video = require("../models/videoModels");
 const { getVideoDataSet, getProductDataSet } = require("./functions");
 const tf_idf = new TfIdf();
 
@@ -12,10 +13,16 @@ async function getUIV(userId){
         userId
     });
 
-    const UIV = userVideoInfo.map(({videoId, UIV, liked, watchTime, duration}) => {
+    const UIV = await Promise.all(userVideoInfo.map(async ({videoId, UIV, watchTime, duration}) => {
+        
+        const videoInfo = await Video.findOne({
+            _id: videoId
+        })
+
+        const likesArr = videoInfo.likes;
         
         let score = UIV;
-        if(liked){
+        if(likesArr.includes(userId)){
             score += 150;
         }
 
@@ -25,16 +32,19 @@ async function getUIV(userId){
             id: videoId,
             score
         }
-    })
+    }));
 
     return UIV;
 }
 
 async function getUIP(userId){
+    console.log(userId);
     const userVideoInfo = await UserProduct.find({
         userId
     });
 
+    console.log('efjbijfi');
+    console.log(userVideoInfo);
     const UIP = userVideoInfo.map(({productId, UIP, addedToCart, productClicked}) => {
         
         let score = UIP;
@@ -49,6 +59,9 @@ async function getUIP(userId){
             score
         }
     })
+
+    console.log('UIP');
+    console.log(UIP);
 
     return UIP;
 }
@@ -92,6 +105,9 @@ async function recommendItems(key, noOfItems, userId) {
         findRecommendationFromIndex = Math.floor(Math.floor(Math.random() * (UIV_len*0.15)) + (UIV_len*0.85));
         console.log(findRecommendationFromIndex,"3rd");
     }
+    if(findRecommendationFromIndex >= UIV.length){
+        return []
+    }
     console.log(UIV[findRecommendationFromIndex].id); 
     const similarItems = await recommender.getSimilarDocuments(UIV[findRecommendationFromIndex].id);
     console.log(similarItems);
@@ -127,6 +143,9 @@ async function recommendItems(key, noOfItems, userId) {
     } else {
         findRecommendationFromIndex = Math.floor(Math.floor(Math.random() * (UIP_len*0.15)) + (UIP_len*0.85));
         console.log(findRecommendationFromIndex,"3rd");
+    }
+    if(findRecommendationFromIndex >= UIP.length){
+        return []
     }
     console.log(UIP[findRecommendationFromIndex].id);
     const similarItems = await recommender.getSimilarDocuments(UIP[findRecommendationFromIndex].id);
@@ -186,7 +205,8 @@ async function getRelatedToProduct(noOfItems, userId){
     const UIP = await getUIP(userId);
     UIP.sort((a,b)=>{return b.score-a.score});
     const RUIP = UIP.slice(0,noOfItems);
-    
+    console.log('kuch');
+    console.log(UIP, RUIP);
     const res = await Promise.all(RUIP.map(async ({id})=>{
       const relatedProdutcs = await getRelatedProductsForPid(id);
       return {id,relatedProdutcs};
@@ -223,12 +243,15 @@ async function getSearchedProducts(query, userId){
 
 async function getSearchedvideos(query, userId){
     videos = await getVideoDataSet();
+    console.log(videos);
     const videosDocs = videos.map(({id,content})=>content);
+    console.log(videosDocs);
     const searchedvideos = await getRelatedvideosFromQuery(query, videosDocs);
-    // console.log(searchedvideos);
+    console.log(searchedvideos);
     let res = [];
     searchedvideos.forEach(async ({index,similarityIndex})=>{
     if(similarityIndex>0){
+        // console.log(index);
         res.push(videos[index].id);
         const userVideo = await UserVideo.findOne({
             userId,
@@ -246,6 +269,7 @@ async function getSearchedvideos(query, userId){
   return res;
 }
 async function getRelatedProductsFromQuery(query,products){
+    const tf_idf = new TfIdf();
   const corpus = await tf_idf.createCorpusFromStringArray(products);
 
   const search_result = await tf_idf.rankDocumentsByQuery(query)
@@ -253,6 +277,7 @@ async function getRelatedProductsFromQuery(query,products){
   return search_result;
 }
 async function getRelatedvideosFromQuery(query,videos){
+    const tf_idf = new TfIdf();
   const corpus = await tf_idf.createCorpusFromStringArray(videos);
 
   const search_result = await tf_idf.rankDocumentsByQuery(query)

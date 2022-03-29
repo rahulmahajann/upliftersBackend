@@ -1,6 +1,5 @@
 const { blankFieldErrorMessage } = require('../constants/strings');
 const UserVideo = require('../models/userVideoModel');
-const Video = require('../models/videoModels');
 
 const setWatchTime = async (req, res) => {
     const userInfo = req.user;
@@ -19,27 +18,12 @@ const setWatchTime = async (req, res) => {
         videoId
     });
 
-    if(!isUserVideo){
-        
-        const videoInfo = await Video.findOne({
-            _id: videoId
-        });
-
-        const likeArr = videoInfo.likes;
-
-        var liked = false
-
-        if(likeArr.includes(userInfo._id)){
-            liked = true
-        }else{
-            liked = false
-        }
+    if(!isUserVideo){ 
 
         const newUserVideo = new UserVideo({
             userId: userInfo._id,
             videoId,
             watchTime,
-            liked,
             duration
         })
         
@@ -55,25 +39,9 @@ const setWatchTime = async (req, res) => {
                     message: err
                 })
             })
-    }else{
-
-        const videoInfo = await Video.findOne({
-            _id: videoId
-        });
-
-
-        const likeArr = videoInfo.likes;
-        var like = false
-        if(likeArr.includes(userInfo._id)){
-            console.log(likeArr.includes(userInfo._id), 'yha se?');
-            like = false
-        }else{
-            console.log(likeArr.includes(userInfo._id), 'nhi yha se!');
-            like = true
-        }
+    }else{ 
         isUserVideo.watchTime = Number(isUserVideo.watchTime) + Number(watchTime);
         isUserVideo.duration = Number(isUserVideo.duration) + Number(duration);
-        isUserVideo.liked = like;
         isUserVideo.save()
             .then(() => {
                 return res.json({

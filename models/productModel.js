@@ -25,6 +25,10 @@ const productSchema = mongoose.Schema({
         productStory : {
             type:String,
         },
+
+        productCost: {
+            type: Number
+        }
     },
     {
         timestamps:true,
